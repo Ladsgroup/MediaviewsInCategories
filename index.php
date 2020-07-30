@@ -128,8 +128,8 @@ if ( $category ) {
 		list( $views, $viewsUrl ) = $values;
 		$fileName = implode('/', array_slice(explode( '/', $filePath), 5));
 		$thumb = str_replace('wikipedia/commons/', 'wikipedia/commons/thumb/', $filePath);
-		$views = number_format( $views );
-		echo "<tr><td><a href=https://commons.wikimedia.org/wiki/File:{$fileName} target='_blank'>{$fileName}</a></td><td><a href=https://upload.wikimedia.org{$filePath} target='_blank'><img src=\"https://upload.wikimedia.org{$thumb}/176px-{$fileName}\"></a></td><td><a href=\"{$viewsUrl}\">{$views}</a></tr>\n";
+		$viewsFormatted = number_format( $views );
+		echo "<tr><td><a href=https://commons.wikimedia.org/wiki/File:{$fileName} target='_blank'>{$fileName}</a></td><td><a href=https://upload.wikimedia.org{$filePath} target='_blank'><img src=\"https://upload.wikimedia.org{$thumb}/176px-{$fileName}\"></a></td><td data-sort-value=\"$views\"><a href=\"{$viewsUrl}\">{$viewsFormatted}</a></tr>\n";
 	}
 	echo "</table>\n";
 } else {
