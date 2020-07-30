@@ -18,9 +18,9 @@
       <div class="container">
         <div class="left menu">
           <div class="title item">
-            <b>Wikidata vandalism dashboard</b>
+            <b>Media Views in Categories</b>
           </div><a href="/" class="launch item">Home</a>
-                <a href="//tools.wmflabs.org/" class="launch item">Labs</a>
+                <a href="//tools.wmflabs.org/" class="launch item">Toolforge</a>
         </div>
 
         <div class="right menu">
