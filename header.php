@@ -7,10 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="Description" content="Tool to get list of media views of files in any given category">
 
-<link rel="stylesheet" type="text/css" href="//tools.wmflabs.org/dexbot/tools/semantic/dist/semantic.min.css">
-<script src="//tools.wmflabs.org/dexbot/tools/jquery.min.js"></script>
-<script src="//tools.wmflabs.org/dexbot/tools/semantic/tablesort.min.js"></script>
-<script src="//tools.wmflabs.org/dexbot/tools/semantic/dist/semantic.min.js"></script>
+<link rel="stylesheet" type="text/css" href="//dexbot.toolforge.org/tools/semantic/dist/semantic.min.css">
+<script src="//dexbot.toolforge.org/tools/jquery.min.js"></script>
+<script src="//dexbot.toolforge.org/tools/semantic/tablesort.min.js"></script>
+<script src="//dexbot.toolforge.org/tools/semantic/dist/semantic.min.js"></script>
 </head>
 <body>
   <div class="main nav">
@@ -20,7 +20,7 @@
           <div class="title item">
             <b>Media Views in Categories</b>
           </div><a href="/" class="launch item">Home</a>
-                <a href="//tools.wmflabs.org/" class="launch item">Toolforge</a>
+                <a href="//toolforge.org/" class="launch item">Toolforge</a>
         </div>
 
         <div class="right menu">
