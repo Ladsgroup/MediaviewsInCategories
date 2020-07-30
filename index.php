@@ -91,20 +91,23 @@ if ( $category ) {
 		$endDate = date('Ymd', strtotime("-{$end} days", time())) . '00';
 	}
 	$startDate = date('Ymd', strtotime("-{$start} days", time())) . '00';
-	$params = [
-		'action' => 'query',
-		'titles' => 'File:' . implode('|File:', $entities),
-		'prop' => 'imageinfo',
-		'format' => 'json',
-		'iiprop' => 'url'
-	];
-	$apiresult = json_decode(
-		file_get_contents('https://commons.wikimedia.org/w/api.php?' . http_build_query($params)
-		), true);
 	$urls = [];
-	foreach ($apiresult['query']['pages'] as $id => $values ) {
-		$urls[] = $values['imageinfo'][0]['url'];
+	foreach ( array_chunk( $entities, 50 )  as $chunk ) {
+		$params = [
+			'action' => 'query',
+			'titles' => 'File:' . implode('|File:', $chunk),
+			'prop' => 'imageinfo',
+			'format' => 'json',
+			'iiprop' => 'url'
+		];
+		$apiresult = json_decode(
+			file_get_contents('https://commons.wikimedia.org/w/api.php?' . http_build_query($params)
+			), true);
+		foreach ($apiresult['query']['pages'] as $id => $values ) {
+			$urls[] = $values['imageinfo'][0]['url'];
+		}
 	}
+
 	$aqs = 'https://wikimedia.org/api/rest_v1/metrics/mediarequests/per-file/all-referers/all-agents/';
 	$total = 0;
 	$finalResult = [];
