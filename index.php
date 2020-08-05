@@ -5,16 +5,47 @@ ini_set('display_errors', 'On');
 
 $category = isset( $_REQUEST['category'] ) ? $_REQUEST['category'] : '';
 $timespan = htmlspecialchars( isset( $_REQUEST['timespan'] ) ? $_REQUEST['timespan'] : '');
+$rangestart = htmlspecialchars( isset( $_REQUEST['rangestart'] ) ? $_REQUEST['rangestart'] : '');
+$rangeend = htmlspecialchars( isset( $_REQUEST['rangeend'] ) ? $_REQUEST['rangeend'] : '');
 
 if (isset($_REQUEST['limit']) && $_REQUEST['limit']) {
 	$limit = (int)$_REQUEST['limit'];
 } else {
-	$limit = 50;
+	$limit = 100;
 }
 ?>
 <script>
 $(function() {
 	$('table.sortable').tablesort();
+	$('.selection.dropdown').dropdown();
+	$('#rangestart').calendar({
+		type: 'date',
+		maxDate: new Date,
+		formatter: {
+			date: function (date, settings) {
+				if (!date) return '';
+				var day = ("0" + date.getDate()).slice(-2);
+				var month = ("0" + (date.getMonth() + 1)).slice(-2);
+				var year = date.getFullYear();
+				return year + '-' + month + '-' + day;
+			}
+      	},
+		endCalendar: $('#rangeend')
+	});
+	$('#rangeend').calendar({
+		type: 'date',
+		maxDate: new Date,
+		formatter: {
+		date: function (date, settings) {
+				if (!date) return '';
+				var day = ("0" + date.getDate()).slice(-2);
+				var month = ("0" + (date.getMonth() + 1)).slice(-2);
+				var year = date.getFullYear();
+				return year + '-' + month + '-' + day;
+			}
+      	},
+		startCalendar: $('#rangestart')
+	});
 });
 </script>
 <div style="padding: 3em;">
@@ -29,13 +60,37 @@ $(function() {
 <i class="asterisk icon"></i>
 </div></div><br>
 <label for="timespan">Timespan:</label><br>
-  <div class="ui corner labeled input">
-<select class="ui selection dropdown" name="timespan" id="timespan">
-    <option selected="" value="now-90">Last three months</option>
-    <option value="now-30">Last month</option>
-    <option value="now-7">Last week</option>
-  </select>
-  </div><br>
+<div class="ui corner selection dropdown labeled">
+  <input type="hidden" name="timespan">
+  <i class="dropdown icon"></i>
+  <div class="default text">Select a time range</div>
+  <div class="menu">
+    <div class="item" data-value="now-90">Last three months</div>
+	<div class="item" data-value="now-30">Last month</div>
+	<div class="item" data-value="now-7">Last week</div>
+  </div>
+</div><br><br>
+  <label>Custom Range (will override the timespan):</label>
+  <div style="padding: 20px;" class="two fields">
+    <div class="field">
+      <label>Start date</label>
+      <div class="ui calendar" id="rangestart">
+        <div class="ui input left icon">
+          <i class="calendar icon"></i>
+          <input type="text" name="rangestart" placeholder="Start">
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>End date</label>
+      <div class="ui calendar" id="rangeend">
+        <div class="ui input left icon">
+          <i class="calendar icon"></i>
+          <input type="text" name="rangeend" placeholder="End">
+        </div>
+      </div>
+    </div>
+  </div>
 <label for="limit">Limit</label><br>
 <div class="ui labeled input">
   <input style="margin-bottom: 0.5em" id="limit" name="limit" type="number" min="1" max="500" required value="<?php echo htmlspecialchars( $limit ); ?>">
@@ -43,7 +98,7 @@ $(function() {
 <br>
 <?php
 function checkbox( $name, $description, $checked ) {
-	$checkedAttribute = $checked ? 'checked' : '';
+	$checkedAttribute = $checked ? 'checked' : 'disabled';
 	echo <<< EOF
 <div class="ui checkbox">
   <input type="checkbox" name="$name" id="$name" $checkedAttribute>
@@ -52,7 +107,21 @@ function checkbox( $name, $description, $checked ) {
 EOF;
 }
 
-checkbox( 'recursive', 'Recursive (currently not working)', isset( $_REQUEST['recursive'] ) );
+// https://stackoverflow.com/a/834355/2596051
+function startsWith( $haystack, $needle ) {
+	$length = strlen( $needle );
+	return substr( $haystack, 0, $length ) === $needle;
+}
+
+function endsWith( $haystack, $needle ) {
+   $length = strlen( $needle );
+   if( !$length ) {
+	   return true;
+   }
+   return substr( $haystack, -$length ) === $needle;
+}
+
+checkbox( 'recursive', 'Include subcategories (currently not working)', isset( $_REQUEST['recursive'] ) );
 ?>
 <br>
   <button type="submit" class="ui primary button">Get data</button>
@@ -82,15 +151,25 @@ if ( $category ) {
 	foreach ($result as $row) {
 		$entities[] = $row['page_title'];
 	}
-	$start = explode( '-', $timespan)[1];
-	$end = explode( '-', $timespan)[0];
-	if ( $end == 'now' ) {
-		$endDate = date("Ymd") . '00';
-		$end = 0;
+	if ( !$rangestart ) {
+		$start = explode( '-', $timespan)[1];
+		$end = explode( '-', $timespan)[0];
+		if ( $end == 'now' ) {
+			$endDate = date("Ymd") . '00';
+			$end = 1;
+		} else {
+			$endDate = date('Ymd', strtotime("-{$end} days", time())) . '00';
+		}
+		$startDate = date('Ymd', strtotime("-{$start} days", time())) . '00';
+		$startDateIso = date('Y-m-d', strtotime("-{$start} days", time()));
+		$endDateIso = date('Y-m-d', strtotime("-{$end} days", time()));
 	} else {
-		$endDate = date('Ymd', strtotime("-{$end} days", time())) . '00';
+		$startDateIso = $rangestart;
+		$endDateIso = $rangeend;
+		$startDate = str_replace( '-', '', $startDateIso ) . '00';
+		$endDate = str_replace( '-', '', $endDateIso ) . '00';
 	}
-	$startDate = date('Ymd', strtotime("-{$start} days", time())) . '00';
+
 	$urls = [];
 	foreach ( array_chunk( $entities, 50 )  as $chunk ) {
 		$params = [
@@ -120,11 +199,13 @@ if ( $category ) {
 		foreach ( $mediaViewData as $case ) {
 			$fileTotal += $case['requests'];
 		}
-		$finalResult[$case['file_path']] = [$fileTotal, $resultUrl];
+		$fileName = implode('/', array_slice(explode( '/', $case['file_path']), 5));
+		$toolTime = "start={$startDateIso}&end={$endDateIso}";
+		$finalResult[$case['file_path']] = [$fileTotal, "https://pageviews.toolforge.org/mediaviews/?project=commons.wikimedia.org&platform=&referer=all-referers&$toolTime&files=$fileName" ];
 		$total += $fileTotal;
 	}
 	echo '</br><b>Total: </b>' . number_format($total) . '</br>';
-	echo '</br><b>Timespan: </b> from ' . date('Y-m-d', strtotime("-{$start} days", time())) . ' to ' . date('Y-m-d', strtotime("-{$end} days", time())) . '</br>'; 
+	echo '</br><b>Timespan: </b> from ' . $startDateIso . ' to ' . $endDateIso . '</br>'; 
 	echo '<table class="ui sortable celled table"><thead><tr><th>File name</th><th>File path</th><th>Views</th></tr></thead><tbody>';
 	echo "\n";
 	foreach ($finalResult as $filePath => $values ) {
@@ -132,7 +213,13 @@ if ( $category ) {
 		$fileName = implode('/', array_slice(explode( '/', $filePath), 5));
 		$thumb = str_replace('wikipedia/commons/', 'wikipedia/commons/thumb/', $filePath);
 		$viewsFormatted = number_format( $views );
-		echo "<tr><td><a href=https://commons.wikimedia.org/wiki/File:{$fileName} target='_blank'>{$fileName}</a></td><td><a href=https://upload.wikimedia.org{$filePath} target='_blank'><img src=\"https://upload.wikimedia.org{$thumb}/176px-{$fileName}\"></a></td><td data-sort-value=\"$views\"><a href=\"{$viewsUrl}\">{$viewsFormatted}</a></tr>\n";
+		$thumbFileName = $fileName;
+		if ( endsWith( strtolower( $fileName ), '.webm' ) ) {
+			$thumbFileName .= '.jpg';
+		} elseif ( endsWith( strtolower( $fileName ), '.svg' ) ) {
+			$thumbFileName .= '.png';
+		}
+		echo "<tr><td><a href=https://commons.wikimedia.org/wiki/File:{$fileName} target='_blank'>{$fileName}</a></td><td><a href=https://upload.wikimedia.org{$filePath} target='_blank'><img src=\"https://upload.wikimedia.org{$thumb}/320px-{$thumbFileName}\"></a></td><td data-sort-value=\"$views\"><a href=\"{$viewsUrl}\">{$viewsFormatted}</a></tr>\n";
 	}
 	echo "</table>\n";
 } else {

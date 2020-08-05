@@ -7,10 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="Description" content="Tool to get list of media views of files in any given category">
 
-<link rel="stylesheet" type="text/css" href="//dexbot.toolforge.org/tools/semantic/dist/semantic.min.css">
+<link rel="stylesheet" type="text/css" href="/semantic.min.css">
 <script src="//dexbot.toolforge.org/tools/jquery.min.js"></script>
 <script src="//dexbot.toolforge.org/tools/semantic/tablesort.min.js"></script>
-<script src="//dexbot.toolforge.org/tools/semantic/dist/semantic.min.js"></script>
+<script src="/semantic.min.js"></script>
 </head>
 <body>
   <div class="main nav">
