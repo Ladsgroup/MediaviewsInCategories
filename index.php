@@ -212,8 +212,9 @@ if ( $category ) {
 		list( $views, $viewsUrl ) = $values;
 		$fileName = implode('/', array_slice(explode( '/', $filePath), 5));
 		$thumb = str_replace('wikipedia/commons/', 'wikipedia/commons/thumb/', $filePath);
+		$thumbFileName = str_replace('?', '%3F', $fileName);
+		$thumb = str_replace('?', '%3F', $thumb);
 		$viewsFormatted = number_format( $views );
-		$thumbFileName = $fileName;
 		if ( endsWith( strtolower( $fileName ), '.webm' ) ) {
 			$thumbFileName .= '.jpg';
 		} elseif ( endsWith( strtolower( $fileName ), '.svg' ) ) {
@@ -234,3 +235,4 @@ if ( $category ) {
 </div>
 </body>
 </html>
+
