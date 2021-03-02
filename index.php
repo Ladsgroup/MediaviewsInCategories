@@ -98,7 +98,7 @@ $(function() {
 <br>
 <?php
 function checkbox( $name, $description, $checked ) {
-	$checkedAttribute = $checked ? 'checked' : 'disabled';
+	$checkedAttribute = $checked ? 'checked' : '';
 	echo <<< EOF
 <div class="ui checkbox">
   <input type="checkbox" name="$name" id="$name" $checkedAttribute>
@@ -121,8 +121,9 @@ function endsWith( $haystack, $needle ) {
    return substr( $haystack, -$length ) === $needle;
 }
 
-checkbox( 'recursive', 'Include subcategories (currently not working)', isset( $_REQUEST['recursive'] ) );
+checkbox( 'recursive', 'Include subcategories (max depth: 5)', isset( $_REQUEST['recursive'] ) );
 ?>
+<br>
 <br>
   <button type="submit" class="ui primary button">Get data</button>
 </form>
@@ -139,7 +140,24 @@ if ( $category ) {
 	$dbname = "commonswiki_p";
 	$db = new PDO('mysql:host='.$dbhost.';dbname='.$dbname.';charset=utf8', $dbuser, $dbpass);
 	$conditions = [];
-	$conditions[] = 'cl_to="' . $category . '"';
+	$categories = [$category];
+	if ( $_REQUEST['recursive'] ) {
+		$c = 1;
+		$prev = $categories;
+		while ( $c < 5 ) {
+			$c++;
+			$sql = 'SELECT page_title from categorylinks JOIN page ON cl_from = page_id WHERE cl_to in ("' . implode('","', $prev ) . '") AND page_namespace = 14;';
+			$prev = [];
+			$result = $db->query($sql)->fetchAll();
+			foreach ($result as $row) {
+				$categories[] = $row[0];
+				$prev[] = $row[0];
+			}
+		}
+	}
+	foreach ($categories as $category) {
+		$conditions[] = 'cl_to="' . $category . '"';
+	}
 	$where = '(' . implode( ' OR ', $conditions ) . ')';
 	$sql = "SELECT page_title " .
 		"FROM categorylinks " .
